@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/components/ThemeProvider";
-import { Sun, Moon, Download, Mail, ChevronDown, Send, Code2 } from "lucide-react";
+import { Sun, Moon, Download, Mail, ChevronLeft, ChevronRight, X, Send, Code2 } from "lucide-react";
 import Network from "@/components/Network";
+import Typing from "@/components/Typing";
 
 const LINKS = {
   github: "https://github.com/PranavKasanagottu",
@@ -73,26 +74,63 @@ function ThemeToggle() {
   );
 }
 
-function Project({ p }) {
-  const [open, setOpen] = useState(false);
+function Projects() {
+  const [filter, setFilter] = useState("All");
+  const [sel, setSel] = useState(null);
+  const track = useRef(null);
+  const tags = ["All", ...new Set(PROJECTS.map((p) => p.tag))];
+  const shown = PROJECTS.filter((p) => filter === "All" || p.tag === filter);
+
+  useEffect(() => {
+    if (!sel) return;
+    const esc = (e) => e.key === "Escape" && setSel(null);
+    addEventListener("keydown", esc);
+    return () => removeEventListener("keydown", esc);
+  }, [sel]);
+
+  const scroll = (d) => track.current.scrollBy({ left: d * 440, behavior: "smooth" });
+
   return (
-    <motion.article layout className="project" transition={{ layout: { duration: 0.4, ease: [0.2, 0.7, 0.2, 1] } }}>
-      <button className="project-head" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <span className="project-date">{p.date}</span>
-        <span className="project-title">{p.title}</span>
-        <motion.span animate={{ rotate: open ? 180 : 0 }}><ChevronDown size={22} /></motion.span>
-      </button>
-      <p className="muted">{p.summary}</p>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
-            <ul className="points">{p.points.map((t) => <li key={t}>{t}</li>)}</ul>
-            <a className="link" href={p.url} target="_blank" rel="noreferrer">View on GitHub</a>
+    <>
+      <div className="proj-bar">
+        <div className="chips" role="group" aria-label="Filter projects">
+          {tags.map((t) => <button key={t} className={`chip pick ${filter === t ? "on" : ""}`} aria-pressed={filter === t} onClick={() => setFilter(t)}>{t}</button>)}
+        </div>
+        <div className="arrows">
+          <button className="icon-btn" aria-label="Previous project" onClick={() => scroll(-1)}><ChevronLeft size={18} /></button>
+          <button className="icon-btn" aria-label="Next project" onClick={() => scroll(1)}><ChevronRight size={18} /></button>
+        </div>
+      </div>
+
+      <div className="carousel" ref={track}>
+        {shown.map((p) => (
+          <motion.div layoutId={`card-${p.title}`} key={p.title} className="card pcard" role="button" tabIndex={0}
+            onClick={() => setSel(p)} onKeyDown={(e) => e.key === "Enter" && setSel(p)}>
+            <span className="muted">{p.date} &middot; {p.tag}</span>
+            <h3>{p.title}</h3>
+            <p className="muted">{p.summary}</p>
+            <div className="chips">{p.stack.map((s) => <span key={s} className="chip">{s}</span>)}</div>
+            <span className="link">View details</span>
+          </motion.div>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {sel && (
+          <motion.div className="overlay" data-lenis-prevent initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSel(null)}>
+            <motion.div layoutId={`card-${sel.title}`} className="modal" role="dialog" aria-modal="true" aria-label={sel.title} onClick={(e) => e.stopPropagation()}>
+              <button className="icon-btn close" aria-label="Close" onClick={() => setSel(null)}><X size={18} /></button>
+              <span className="muted">{sel.date}</span>
+              <h3>{sel.title}</h3>
+              <p>{sel.summary}</p>
+              <ul className="points">{sel.points.map((t) => <li key={t}>{t}</li>)}</ul>
+              <div className="chips">{sel.stack.map((s) => <span key={s} className="chip">{s}</span>)}</div>
+              <a className="btn" href={sel.url} target="_blank" rel="noreferrer"><GithubMark size={16} /> View on GitHub</a>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="chips">{p.stack.map((s) => <span key={s} className="chip">{s}</span>)}</div>
-    </motion.article>
+    </>
   );
 }
 
@@ -140,10 +178,6 @@ function Contact() {
   );
 }
 export default function Home() {
-  const [filter, setFilter] = useState("All");
-  const tags = ["All", ...new Set(PROJECTS.map((p) => p.tag))];
-  const shown = PROJECTS.filter((p) => filter === "All" || p.tag === filter);
-
   return (
     <main>
       <nav className="nav">
@@ -157,18 +191,23 @@ export default function Home() {
       <header id="top" className="hero">
         <Network />
         <div className="hero-inner">
-          <motion.p {...fade(0)} className="muted">AI/ML student | Cloud curious | Builder</motion.p>
-          <motion.h1 {...fade(1)}>Curious by default. Practical by design.</motion.h1>
+          <motion.p {...fade(0)} className="status"><i /> Open to internships</motion.p>
+          <motion.h1 {...fade(1)}><Typing text="Curious by default. Practical by design." delay={700} /></motion.h1>
           <motion.p {...fade(2)} className="lead">I&apos;m Pranav Kasanagottu. I explore the space where intelligent software meets real-world constraints, turning ambitious questions into useful systems.</motion.p>
           <motion.div {...fade(3)} className="row">
             <a className="btn" href="#projects">See my projects</a>
             <a className="btn ghost" href={`mailto:${LINKS.email}`}><Mail size={16} /> Email me</a>
           </motion.div>
+          <motion.dl {...fade(4)} className="dash">
+            {[["9.425", "CGPA"], ["900+", "LeetCode solved"], ["1938", "Contest rating"], ["3", "Featured projects"]].map(([v, l]) => (
+            <div key={l} className="card"><dt>{l}</dt><dd>{v}</dd></div>
+            ))}
+          </motion.dl>
         </div>
       </header>
 
       <section id="about" className="section">
-        <h2>About</h2>
+        <h2><Typing text="About" /></h2>
         <div className="about">
           <p>I&apos;m a Computer Science student specializing in AI/ML, with a growing focus on cloud computing and the systems that take models from notebooks into useful products. I like the part where an idea has to work in the real world, so I learn by building, experimenting with emerging technologies, and turning concepts into practical solutions. My work spans the full ML lifecycle: developing models, connecting them to applications, and improving how they are deployed, optimized, and experienced.</p>
           <dl className="stats">
@@ -180,7 +219,7 @@ export default function Home() {
       </section>
 
       <section id="skills" className="section">
-        <h2>Skills</h2>
+        <h2><Typing text="Skills" /></h2>
         <div className="skills">
           {Object.entries(SKILLS).map(([group, items]) => (
             <div key={group}><h3>{group}</h3><div className="chips">{items.map((s) => <span key={s} className="chip">{s}</span>)}</div></div>
@@ -189,15 +228,12 @@ export default function Home() {
       </section>
 
       <section id="projects" className="section">
-        <h2>Projects</h2>
-        <div className="chips filters" role="group" aria-label="Filter projects">
-          {tags.map((t) => <button key={t} className={`chip pick ${filter === t ? "on" : ""}`} aria-pressed={filter === t} onClick={() => setFilter(t)}>{t}</button>)}
-        </div>
-        <div className="projects">{shown.map((p) => <Project key={p.title} p={p} />)}</div>
+        <h2><Typing text="Projects" /></h2>
+          <Projects />
       </section>
 
       <section id="journey" className="section">
-        <h2>Journey</h2>
+        <h2><Typing text="Journey" /></h2>
         <div className="two">
           <ol className="timeline">
             {JOURNEY.map((j) => (
@@ -207,13 +243,12 @@ export default function Home() {
           <div>
             <h3>Achievements</h3>
             <ul className="wins">{WINS.map(([k, t, d]) => <li key={t}><b>{k}</b> {t}<br /><span className="muted">{d}</span></li>)}</ul>
-            <p className="muted">Work experience will appear here once I have some to share. I&apos;m looking for internships.</p>
           </div>
         </div>
       </section>
 
       <section id="contact" className="section">
-        <h2>Contact me</h2>
+        <h2><Typing text="Contact me" /></h2>
         <div className="two">
           <div className="contact-details">
             <p><a className="link" href={`mailto:${LINKS.email}`}>{LINKS.email}</a></p>
