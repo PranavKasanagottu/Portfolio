@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
-const ThemeContext = createContext({ theme: "light", setTheme: () => {} });
+const ThemeContext = createContext({ theme: "dark", setTheme: () => {} });
 const themeListeners = new Set();
 
 function subscribe(listener) {
@@ -12,11 +12,11 @@ function subscribe(listener) {
 
 function getThemeSnapshot() {
   const storedTheme = window.localStorage.getItem("theme");
-  return storedTheme === "dark" || storedTheme === "light" ? storedTheme : "light";
+  return storedTheme === "dark" || storedTheme === "light" ? storedTheme : "dark";
 }
 
 function getServerThemeSnapshot() {
-  return "light";
+  return "dark";
 }
 
 export function ThemeProvider({ children }) {

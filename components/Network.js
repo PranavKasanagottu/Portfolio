@@ -43,9 +43,16 @@ export default function Network() {
       raf = requestAnimationFrame(draw);
     };
     const move = (e) => { const r = c.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; };
+    let lastW = innerWidth, lastH = innerHeight;
+    const onResize = () => {
+      if (innerWidth !== lastW || Math.abs(innerHeight - lastH) > 150) {
+        lastW = innerWidth; lastH = innerHeight; init();
+      }
+    };
+
     init(); draw();
-    addEventListener("resize", init); addEventListener("pointermove", move);
-    return () => { cancelAnimationFrame(raf); removeEventListener("resize", init); removeEventListener("pointermove", move); };
+    addEventListener("resize", onResize); addEventListener("pointermove", move);
+    return () => { cancelAnimationFrame(raf); removeEventListener("resize", onResize); removeEventListener("pointermove", move); };
   }, []);
   return <canvas ref={ref} className="network" aria-hidden="true" />;
 }

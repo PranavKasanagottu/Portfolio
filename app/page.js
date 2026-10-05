@@ -5,6 +5,9 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Sun, Moon, Download, Mail, ChevronLeft, ChevronRight, X, Send, Code2 } from "lucide-react";
 import Network from "@/components/Network";
 import Typing from "@/components/Typing";
+import TypingLoop from "@/components/TypingLoop";
+import CountUp from "@/components/CountUp";
+import TechStrip from "@/components/TechStrip";
 
 const LINKS = {
   github: "https://github.com/PranavKasanagottu",
@@ -58,7 +61,7 @@ const JOURNEY = [
 const WINS = [
   ["Winner", "CoinQuest Hackathon", "Built a pharmaceutical management app in Python."],
   ["Runner-up", "Prakalp Project Expo", "Technical excellence award, Human Resources category."],
-  ["Selected", "Centific Premier Hackathon 2.0", "Led to an internship offer."],
+  ["Won", "Centific Premier Hackathon 2.0", "Led to an internship offer."],
   ["Certified", "GDG Study Jams", "Hands-on Google Cloud labs."],
   ["Completed", "Udemy courses", "Full Stack Web Development and System Design."],
 ];
@@ -180,6 +183,7 @@ function Contact() {
 export default function Home() {
   return (
     <main>
+      <Network />
       <nav className="nav">
         <a href="#top" className="logo">PK</a>
         <div className="nav-links">
@@ -189,18 +193,18 @@ export default function Home() {
       </nav>
 
       <header id="top" className="hero">
-        <Network />
         <div className="hero-inner">
           <motion.p {...fade(0)} className="status"><i /> Open to internships</motion.p>
-          <motion.h1 {...fade(1)}><Typing text="Curious by default. Practical by design." delay={700} /></motion.h1>
-          <motion.p {...fade(2)} className="lead">I&apos;m Pranav Kasanagottu. I explore the space where intelligent software meets real-world constraints, turning ambitious questions into useful systems.</motion.p>
+          <motion.h1 {...fade(1)}><Typing text="Pranav Kasanagottu" delay={700} /></motion.h1>
+          <motion.p {...fade(2)} className="lead"><TypingLoop texts={["AI Engineer", "Software Developer", "Competitive Programmer"]} delay={700} /></motion.p>
+          <motion.p {...fade(2)} className="lead">Building intelligent systems and scalable products where AI, distributed systems, and engineering precision meet real-world impact.</motion.p>
           <motion.div {...fade(3)} className="row">
             <a className="btn" href="#projects">See my projects</a>
             <a className="btn ghost" href={`mailto:${LINKS.email}`}><Mail size={16} /> Email me</a>
           </motion.div>
           <motion.dl {...fade(4)} className="dash">
             {[["9.425", "CGPA"], ["900+", "LeetCode solved"], ["1938", "Contest rating"], ["3", "Featured projects"]].map(([v, l]) => (
-            <div key={l} className="card"><dt>{l}</dt><dd>{v}</dd></div>
+            <div key={l} className="card"><dt>{l}</dt><dd><CountUp value={v} /></dd></div>
             ))}
           </motion.dl>
         </div>
@@ -211,15 +215,16 @@ export default function Home() {
         <div className="about">
           <p>I&apos;m a Computer Science student specializing in AI/ML, with a growing focus on cloud computing and the systems that take models from notebooks into useful products. I like the part where an idea has to work in the real world, so I learn by building, experimenting with emerging technologies, and turning concepts into practical solutions. My work spans the full ML lifecycle: developing models, connecting them to applications, and improving how they are deployed, optimized, and experienced.</p>
           <dl className="stats">
-            <div><dt>CGPA</dt><dd>9.425</dd></div>
-            <div><dt>LeetCode problems</dt><dd>900+</dd></div>
-            <div><dt>Contest rating</dt><dd>1938</dd></div>
+            <div><dt>CGPA</dt><dd><CountUp value="9.425" /></dd></div>
+            <div><dt>LeetCode problems</dt><dd><CountUp value="950+" /></dd></div>
+            <div><dt>Contest rating</dt><dd><CountUp value="1938" /></dd></div>
           </dl>
         </div>
       </section>
 
       <section id="skills" className="section">
         <h2><Typing text="Skills" /></h2>
+        <TechStrip items={Object.values(SKILLS).flat()} />
         <div className="skills">
           {Object.entries(SKILLS).map(([group, items]) => (
             <div key={group}><h3>{group}</h3><div className="chips">{items.map((s) => <span key={s} className="chip">{s}</span>)}</div></div>
